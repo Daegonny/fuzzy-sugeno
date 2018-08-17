@@ -11,7 +11,7 @@ from random import shuffle
 
 NUMBER_POINTS =  12
 EPOCHS = 500
-ALPHA = 0.1
+ALPHA = 000.1
 
 x=[
    -0.91, 
@@ -48,13 +48,13 @@ y = [
 
 #partições fuzzy com valores arbitrários
 
-a1 = -1
-b1 = 0
+a1 = -0.5
+b1 = 0.1
 def  w1(x):
     return (a1*x + b1)
 
-a2 = 1.5
-b2 = 0
+a2 = 0.7
+b2 = -0.1
 def  w2(x):
     return (a2*x + b2)
 
@@ -62,12 +62,12 @@ def  w2(x):
 #equações paramétricas com valores de retas arbitrárias
     
 p1 = 2
-r1 = 0
+r1 = 0.3
 def z1(x):
     return (p1*x + r1)
 
 p2 = -2
-r2 = 0
+r2 = 0.2
 def z2(x):
     return (p2*x + r2)
 
@@ -97,6 +97,19 @@ def del_b1(x):
 def del_b2(x):
     return w2(x)/(w1(x)+w2(x))
 
+def del_p1(x):
+    return w1(x)*x/(w1(x)+w2(x))
+
+def del_p2(x):
+    return w2(x)*x/(w1(x)+w2(x))
+
+def del_r1(x):
+    return w1(x)/(w1(x)+w2(x))
+
+def del_r2(x):
+    return w2(x)/(w1(x)+w2(x))
+
+
 #lista de indices que pode ser embaralhada aleatoriamente
 indexes = list(range(NUMBER_POINTS))
 
@@ -108,15 +121,26 @@ while epoch < EPOCHS:
     total_error = 0
     for idx in indexes:
         y_pred = z(x[idx])
-        error = abs(y_pred - y[idx])
+        error = y_pred - y[idx]
+        
         total_error += error
         
         #ajuste
+        p1 = p1 - error*ALPHA*del_p1(x[idx])
+        p2 = p2 - error*ALPHA*del_p2(x[idx])
+        r1 = r1 - error*ALPHA*del_r1(x[idx])
+        r2 = r2 - error*ALPHA*del_r2(x[idx])
         a1 = a1 - error*ALPHA*del_a1(x[idx])
         a2 = a2 - error*ALPHA*del_a2(x[idx])
         b1 = b1 - error*ALPHA*del_b1(x[idx])
         b2 = b2 - error*ALPHA*del_b2(x[idx])
     
-    #errors.append(total_error)
+    errors.append(total_error)
     epoch += 1
 
+
+#print(del_p1(x[0]))
+#y_pred = [z(xi) for xi in x]
+
+#plt.plot(x,y_pred,x, y)
+#plt.show()

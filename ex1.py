@@ -6,9 +6,12 @@ Created on Fri Aug 17 08:33:21 2018
 @author: daegonny
 """
 #import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+from random import shuffle
 
 NUMBER_POINTS =  12
+EPOCHS = 500
+ALPHA = 0.1
 
 x=[
    -0.91, 
@@ -43,34 +46,77 @@ y = [
 #plt.scatter(x,y)
 
 
-#partições fuzzy
+#partições fuzzy com valores arbitrários
 
 a1 = -1
 b1 = 0
 def  w1(x):
-    return a1*x + b1
+    return (a1*x + b1)
 
-a2 = 1
+a2 = 1.5
 b2 = 0
 def  w2(x):
-    return a2*x + b2
+    return (a2*x + b2)
 
 
-#equações paramétricas
+#equações paramétricas com valores de retas arbitrárias
     
 p1 = 2
 r1 = 0
 def z1(x):
-    return p1*x + r1
+    return (p1*x + r1)
 
 p2 = -2
 r2 = 0
 def z2(x):
-    return p2*x + r2
+    return (p2*x + r2)
 
 #média ponderada 
     
 def z(x):
-    (w1(x)*z1(x) + w2(x)*z2(x))/ (w1(x)/w2(x)) 
+    return ((w1(x)*z1(x) + w2(x)*z2(x))/ (w1(x)/w2(x))) 
 
+
+
+#comparação das duas parábolas antes da otimização
+y_pred = [z(xi) for xi in x]
+
+plt.plot(x,y_pred,x, y)
+plt.show()
+
+#derivadas parciais de z
+def del_a1(x):
+    return w1(x)*x/(w1(x)+w2(x))
+
+def del_a2(x):
+    return w2(x)*x/(w1(x)+w2(x))
+
+def del_b1(x):
+    return w1(x)/(w1(x)+w2(x))
+
+def del_b2(x):
+    return w2(x)/(w1(x)+w2(x))
+
+#lista de indices que pode ser embaralhada aleatoriamente
+indexes = list(range(NUMBER_POINTS))
+
+#treinamento
+epoch = 0
+errors = []
+while epoch < EPOCHS:
+    shuffle(indexes)
+    total_error = 0
+    for idx in indexes:
+        y_pred = z(x[idx])
+        error = abs(y_pred - y[idx])
+        total_error += error
+        
+        #ajuste
+        a1 = a1 - error*ALPHA*del_a1(x[idx])
+        a2 = a2 - error*ALPHA*del_a2(x[idx])
+        b1 = b1 - error*ALPHA*del_b1(x[idx])
+        b2 = b2 - error*ALPHA*del_b2(x[idx])
+    
+    #errors.append(total_error)
+    epoch += 1
 

@@ -16,7 +16,7 @@ ALPHA = 0.01
 x = [-2 + n*(4/(NUMBER_POINTS-1)) for n in range(NUMBER_POINTS)]
 y = [xi*xi for xi in x]
 
-#plt.plot(x,y)
+plt.plot(x,y)
 
 #partições fuzzy gaussianas
 m1 = 1
@@ -34,7 +34,7 @@ def w2(x):
 
 w1_pred = [w1(xi) for xi in x]
 w2_pred = [w2(xi) for xi in x]
-#plt.plot(x,w1_pred,x, w2_pred)
+plt.plot(x,w1_pred,x, w2_pred)
 
 #equações paramétricas
 p1 = 0.1
@@ -119,5 +119,6 @@ while epoch < EPOCHS:
 
 y_pred = [z(xi) for xi in x]
 
-plt.plot(x,y_pred,x, y)
+plt.plot(x, y,x,y_pred)
 plt.show()
+plt.plot(errors)

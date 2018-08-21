@@ -5,62 +5,38 @@ Created on Fri Aug 17 08:33:21 2018
 
 @author: daegonny
 """
-#import numpy as np
+import numpy as np
 import matplotlib.pyplot as plt
 from random import shuffle
 
-NUMBER_POINTS =  12
+NUMBER_POINTS =  100
 EPOCHS = 500
-ALPHA = 000.1
+ALPHA = 0.01
 
-x=[
-   -0.91,
-   -0.77,
-   -0.44,
-   -0.39,
-   -0.21,
-   -0.01,
-   0.22,
-   0.33,
-   0.47,
-   0.65,
-   0.85,
-   0.89
-]
+x = [-2 + n*(4/(NUMBER_POINTS-1)) for n in range(NUMBER_POINTS)]
+y = [xi*xi for xi in x]
 
-y = [
-     0.9101,
-     0.6469,
-     0.1816,
-     0.1301,
-     -0.0139,
-     -0.0979,
-     -0.0956,
-     -0.0571,
-     0.0269,
-     0.1925,
-     0.4525,
-     0.5141
- ]
+#plt.plot(x,y)
 
-#plt.scatter(x,y)
+#partições fuzzy gaussianas
+m1 = 1
+s1 = 0.5
+
+def w1(x):
+    return np.exp(-0.5*np.power((x-m1)/(s1),2))
+
+m2 = -1
+s2 = 0.5
+
+def w2(x):
+    return np.exp(-0.5*np.power((x-m2)/(s2),2))
 
 
-#partições fuzzy com valores arbitrários
+w1_pred = [w1(xi) for xi in x]
+w2_pred = [w2(xi) for xi in x]
+#plt.plot(x,w1_pred,x, w2_pred)
 
-a1 = -0.5
-b1 = 0.1
-def  w1(x):
-    return (a1*x + b1)
-
-a2 = 0.7
-b2 = -0.1
-def  w2(x):
-    return (a2*x + b2)
-
-
-#equações paramétricas com valores de retas arbitrárias
-
+#equações paramétricas
 p1 = 0.1
 r1 = 0.3
 def z1(x):
@@ -71,30 +47,33 @@ r2 = -0.2
 def z2(x):
     return (p2*x + r2)
 
-#média ponderada
-
+#média ponderada 
+    
 def z(x):
     num = w1(x)*z1(x) + w2(x)*z2(x)
     den = w1(x)+w2(x)
     return num/den
 
+
 #comparação das duas parábolas antes da otimização
 z_pred = [z(xi) for xi in x]
-plt.plot(x,z_pred,x, y)
-plt.show()
+
+#plt.plot(x,z_pred,x, y)
+
 
 #derivadas parciais de z
-def del_a1(x):
-    return w1(x)*x/(w1(x)+w2(x))
 
-def del_a2(x):
-    return w2(x)*x/(w1(x)+w2(x))
+def del_m1(x):
+    return w2(x) * ((z1(x) - z2(x))/np.power((w1(x) + w2(x)),2)) * w1(x) * ((x-m1)/np.power(s1,2))
 
-def del_b1(x):
-    return w1(x)/(w1(x)+w2(x))
+def del_m2(x):
+    return w1(x) * ((z2(x) - z1(x))/np.power((w1(x) + w2(x)),2)) * w2(x) * ((x-m2)/np.power(s2,2))
 
-def del_b2(x):
-    return w2(x)/(w1(x)+w2(x))
+def del_s1(x):
+    return w2(x) * ((z1(x) - z2(x))/np.power((w1(x) + w2(x)),2)) * w1(x) * (np.power((x-m1),2)/np.power(s1,3))
+
+def del_s2(x):
+    return w1(x) * ((z2(x) - z1(x))/np.power((w1(x) + w2(x)),2)) * w2(x) * (np.power((x-m1),2)/np.power(s2,3))
 
 def del_p1(x):
     return w1(x)*x/(w1(x)+w2(x))
@@ -108,7 +87,6 @@ def del_r1(x):
 def del_r2(x):
     return w2(x)/(w1(x)+w2(x))
 
-
 #lista de indices que pode ser embaralhada aleatoriamente
 indexes = list(range(NUMBER_POINTS))
 
@@ -120,24 +98,25 @@ while epoch < EPOCHS:
     total_error = 0
     for idx in indexes:
         y_pred = z(x[idx])
-        error = y[idx] - y_pred
-
+        error = y[idx] - y_pred 
+        
         total_error += error
-
+        
         #ajuste
         p1 = p1 + (error*ALPHA*del_p1(x[idx]))
         p2 = p2 + (error*ALPHA*del_p2(x[idx]))
         r1 = r1 + (error*ALPHA*del_r1(x[idx]))
         r2 = r2 + (error*ALPHA*del_r2(x[idx]))
-        a1 = a1 + (error*ALPHA*del_a1(x[idx]))
-        a2 = a2 + (error*ALPHA*del_a2(x[idx]))
-        b1 = b1 + (error*ALPHA*del_b1(x[idx]))
-        b2 = b2 + (error*ALPHA*del_b2(x[idx]))
-
+        s1 = s1 + (error*ALPHA*del_s1(x[idx]))
+        s2 = s2 + (error*ALPHA*del_s2(x[idx]))
+        m1 = m1 + (error*ALPHA*del_m1(x[idx]))
+        m2 = m2 + (error*ALPHA*del_m2(x[idx]))
+        
+    
     errors.append(total_error)
     epoch += 1
 
-#print(del_p1(x[0]))
+
 y_pred = [z(xi) for xi in x]
 
 plt.plot(x,y_pred,x, y)

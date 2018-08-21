@@ -74,14 +74,13 @@ def z2(x):
 #média ponderada 
     
 def z(x):
-    return ((w1(x)*z1(x) + w2(x)*z2(x))/ (w1(x)/w2(x))) 
+    return ((w1(x)*z1(x) + w2(x)*z2(x))/ (w1(x)+w2(x))) 
 
 
 
 #comparação das duas parábolas antes da otimização
-y_pred = [z(xi) for xi in x]
-
-plt.plot(x,y_pred,x, y)
+z_pred = [z(xi) for xi in x]
+plt.plot(x,z_pred,x, y)
 plt.show()
 
 #derivadas parciais de z
